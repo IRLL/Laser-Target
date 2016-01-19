@@ -1,0 +1,2 @@
+vision
+-DCATKIN_DEVEL_PREFIX=/home/kayl/Laser-Target/ChargingLaserSystem/devel -DCMAKE_INSTALL_PREFIX=/home/kayl/Laser-Target/ChargingLaserSystem/install -G Unix Makefiles
