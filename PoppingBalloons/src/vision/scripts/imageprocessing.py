@@ -28,8 +28,8 @@ y_point_target = x_point_target = -1
 # Window names
 RED_LASER_MASK = "Red Image Mask"
 BLACK_BALLOON_MASK = "Black Image Mask"
-cv2.namedWindow(RED_MASK)
-cv2.namedWindow(BLUE_MASK)
+cv2.namedWindow(RED_LASER_MASK)
+cv2.namedWindow(BLACK_BALLOON_MASK)
 
 # TO DO: Set individual values
 h_min_red = 126
