@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 
 # TO DO:
-#       
+#       Implement when laser is out of sight of camera
+#       Set max and min values for servos
+
+# Reference:
+#       Servo 1 : Left x servo (starts at 135 degrees)
+#       Servo 2 : Right x servo (starts at 135 degrees)
+#       Servo 3 : Directional y servo (starts at 90 degrees)
+#       Servo 4 : y servo (starts at 45 degrees)
+#       Servo 5 : safe laser servo (starts at 180 degrees)
+#
 
 
 import rospy
@@ -21,9 +30,15 @@ time.sleep(2)
 # Initialize variables
 target = 0 
 initialize = 0
-x_degree = y_degree = 90
 y_point_laser = x_point_laser = -1
-y_point_target = x_point_target = -1 
+y_point_target = x_point_target = -1
+
+# Initialize servo
+servo1 = 135
+servo2 = 135
+servo3 = 90
+servo4 = 45
+servo5 = 180
 
 # Window names
 RED_LASER_MASK = "Red Laser Image Mask"
@@ -49,12 +64,12 @@ v_max_blue = 255
 def nothing(x):
     pass
 
-cv2.createTrackbar('LowH', BLUE_BALLOON_MASK, h_min_blue, 179, nothing)
-cv2.createTrackbar('HighH', BLUE_BALLOON_MASK, h_max_blue, 179, nothing)
-cv2.createTrackbar('LowS', BLUE_BALLOON_MASK, s_min_blue, 255, nothing)
-cv2.createTrackbar('HighS', BLUE_BALLOON_MASK, s_max_blue, 255, nothing) 
-cv2.createTrackbar('LowV', BLUE_BALLOON_MASK, v_min_blue, 255, nothing)
-cv2.createTrackbar('HighV', BLUE_BALLOON_MASK, v_max_blue, 255, nothing) 
+cv2.createTrackbar('LowH', BLUE_TARGET_MASK, h_min_blue, 179, nothing)
+cv2.createTrackbar('HighH', BLUE_TARGET_MASK, h_max_blue, 179, nothing)
+cv2.createTrackbar('LowS', BLUE_TARGET_MASK, s_min_blue, 255, nothing)
+cv2.createTrackbar('HighS', BLUE_TARGET_MASK, s_max_blue, 255, nothing) 
+cv2.createTrackbar('LowV', BLUE_TARGET_MASK, v_min_blue, 255, nothing)
+cv2.createTrackbar('HighV', BLUE_TARGET_MASK, v_max_blue, 255, nothing) 
 
 cv2.createTrackbar('LowH', RED_LASER_MASK, h_min_red, 179, nothing)
 cv2.createTrackbar('HighH', RED_LASER_MASK, h_max_red, 179, nothing)
@@ -85,12 +100,12 @@ def publisher():
     # Convet to HSV 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    h_min_blue = cv2.getTrackbarPos('LowH', BLUE_BALLOON_MASK)
-    h_max_blue = cv2.getTrackbarPos('HighH', BLUE_BALLOON_MASK)
-    s_min_blue = cv2.getTrackbarPos('LowS', BLUE_BALLOON_MASK)
-    s_max_blue = cv2.getTrackbarPos('HighS', BLUE_BALLOON_MASK) 
-    v_min_blue = cv2.getTrackbarPos('LowV', BLUE_BALLOON_MASK)
-    v_max_blue = cv2.getTrackbarPos('HighV', BLUE_BALLOON_MASK) 
+    h_min_blue = cv2.getTrackbarPos('LowH', BLUE_TARGET_MASK)
+    h_max_blue = cv2.getTrackbarPos('HighH', BLUE_TARGET_MASK)
+    s_min_blue = cv2.getTrackbarPos('LowS', BLUE_TARGET_MASK)
+    s_max_blue = cv2.getTrackbarPos('HighS', BLUE_TARGET_MASK) 
+    v_min_blue = cv2.getTrackbarPos('LowV', BLUE_TARGET_MASK)
+    v_max_blue = cv2.getTrackbarPos('HighV', BLUE_TARGET_MASK) 
           
     h_min_red = cv2.getTrackbarPos('LowH', RED_LASER_MASK)
     h_max_red = cv2.getTrackbarPos('HighH', RED_LASER_MASK)
@@ -114,7 +129,7 @@ def publisher():
         
     # Show video
     cv2.imshow(RED_LASER_MASK, red_mask)
-    cv2.imshow(BLUE_BALLOON_MASK, blue_mask)
+    cv2.imshow(BLUE_TARGET_MASK, blue_mask)
         
     # Find Target Location
     findTargetLocation()
@@ -199,17 +214,25 @@ def checkXPoint():
   if 8 < math.fabs(x_point_laser - x_point_target) and target == 1 and initialize != 0:
     # Point is not realative to the x axis
     # Change X degrees
-    if x_point_laser < x_point_target:
-      x_degree++
-    elif x_point_laser > x_point_target:
-      x_degree--
+    if x_point_laser < x_point_target: 
+      #move right
+      servo1++
+      #move directional y right
+      servo3++
+    elif x_point_laser > x_point_target: 
+      #move left
+      servo1--
+      #move directional y left
+      servo3--
 
 def checkYPoint():
   # Check if laser is at the right point relative to the y axis
   if  8 < math.fabs(y_point_laser - y_point_target) and target == 1 and initialize != 0:
-    # Point is not realative to the y axis      
+    # Point is not realative to the y axis
     # Change Y degrees
     if y_point_laser < y_point_target:
-      y_degree++
+      #move up
+      servo4++
     elif y_point_laser > y_point_target:
-      y_degree--
+      #move down
+      servo4--
